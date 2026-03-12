@@ -1,0 +1,861 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chocolatier — World's Finest Chocolate Brands</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@100;300;400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cocoa: #1a0a00;
+      --dark-choc: #2d1206;
+      --milk-choc: #7b3f00;
+      --caramel: #c8860a;
+      --gold: #e8c46a;
+      --cream: #fdf6e3;
+      --white-choc: #f5e6c8;
+      --bitter: #3d1a08;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cocoa);
+      color: var(--cream);
+      font-family: 'Cormorant Garamond', serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid var(--gold);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transition: transform 0.25s ease, width 0.3s, height 0.3s;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1000; opacity: 0.4;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 500;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.5rem 4rem;
+      background: linear-gradient(to bottom, rgba(26,10,0,0.95), transparent);
+      backdrop-filter: blur(4px);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+    .nav-logo span { font-style: italic; color: var(--caramel); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.7rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--white-choc);
+      text-decoration: none; transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      background: radial-gradient(ellipse at 30% 50%, #3d1a08 0%, #1a0a00 60%);
+    }
+    .hero-bg-circles {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .hero-bg-circles::before {
+      content: '';
+      position: absolute; width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,134,10,0.12) 0%, transparent 70%);
+      top: -100px; right: -150px;
+      animation: pulse 6s ease-in-out infinite;
+    }
+    .hero-bg-circles::after {
+      content: '';
+      position: absolute; width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(123,63,0,0.15) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+      animation: pulse 8s ease-in-out infinite reverse;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .hero-content {
+      text-align: center; position: relative; z-index: 2;
+      max-width: 900px; padding: 2rem;
+    }
+    .hero-eyebrow {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem; letter-spacing: 0.4em;
+      text-transform: uppercase; color: var(--caramel);
+      margin-bottom: 1.5rem;
+      animation: fadeUp 1s ease both;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 900; line-height: 1;
+      color: var(--cream);
+      animation: fadeUp 1s 0.2s ease both;
+    }
+    .hero-title em {
+      color: var(--gold); font-style: italic;
+      display: block;
+    }
+    .hero-sub {
+      font-size: 1.4rem; font-weight: 300;
+      color: var(--white-choc); opacity: 0.7;
+      margin: 1.5rem 0 2.5rem;
+      line-height: 1.7;
+      animation: fadeUp 1s 0.4s ease both;
+    }
+    .hero-cta {
+      display: inline-block;
+      padding: 1rem 2.8rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.7rem; letter-spacing: 0.3em;
+      text-transform: uppercase; text-decoration: none;
+      transition: all 0.4s;
+      animation: fadeUp 1s 0.6s ease both;
+      position: relative; overflow: hidden;
+    }
+    .hero-cta::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--gold);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+      z-index: -1;
+    }
+    .hero-cta:hover { color: var(--cocoa); }
+    .hero-cta:hover::before { transform: translateX(0); }
+
+    .scroll-hint {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      animation: fadeUp 1s 1s ease both;
+    }
+    .scroll-hint span {
+      display: block; width: 1px; height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--caramel));
+      margin: 0 auto;
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+    @keyframes scrollLine {
+      0% { transform: scaleY(0); transform-origin: top; }
+      50% { transform: scaleY(1); transform-origin: top; }
+      50.01% { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* DIVIDER */
+    .divider {
+      text-align: center; padding: 1rem;
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.6rem; letter-spacing: 0.5em;
+      color: var(--caramel); text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: '— '; color: var(--milk-choc);
+    }
+
+    /* SECTION */
+    section { padding: 6rem 4rem; }
+
+    .section-header {
+      text-align: center; margin-bottom: 4rem;
+    }
+    .section-tag {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.6rem; letter-spacing: 0.5em;
+      text-transform: uppercase; color: var(--caramel);
+      display: block; margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--cream); font-weight: 700;
+    }
+    .section-title em { color: var(--gold); font-style: italic; }
+
+    /* BRANDS GRID */
+    .brands-section {
+      background: linear-gradient(to bottom, var(--cocoa), var(--dark-choc));
+    }
+    .brands-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2px;
+      max-width: 1400px; margin: 0 auto;
+    }
+
+    .brand-card {
+      position: relative; overflow: hidden;
+      aspect-ratio: 3/4;
+      cursor: none;
+    }
+    .brand-card-inner {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 2.5rem;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .brand-card:hover .brand-card-inner { transform: translateY(-8px); }
+
+    .brand-bg {
+      position: absolute; inset: 0;
+      transition: transform 0.6s ease;
+    }
+    .brand-card:hover .brand-bg { transform: scale(1.05); }
+
+    /* Brand specific backgrounds */
+    .brand-lindt .brand-bg { background: linear-gradient(135deg, #8B1A1A 0%, #2d0a0a 40%, #1a0505 100%); }
+    .brand-ferrero .brand-bg { background: linear-gradient(135deg, #2c1a00 0%, #5c3900 40%, #1a0f00 100%); }
+    .brand-godiva .brand-bg { background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3d 40%, #05050f 100%); }
+    .brand-valrhona .brand-bg { background: linear-gradient(135deg, #0f1a0a 0%, #1e3d0a 40%, #050f05 100%); }
+    .brand-toblerone .brand-bg { background: linear-gradient(135deg, #1a0a2d 0%, #3d0a5c 40%, #0f0517 100%); }
+    .brand-cadbury .brand-bg { background: linear-gradient(135deg, #1a0040 0%, #3d0099 40%, #0a001a 100%); }
+    .brand-kinder .brand-bg { background: linear-gradient(135deg, #1a1500 0%, #3d3300 40%, #0a0800 100%); }
+    .brand-ghirardelli .brand-bg { background: linear-gradient(135deg, #1a0805 0%, #3d1a0a 40%, #0a0402 100%); }
+
+    .brand-emblem {
+      font-size: 3.5rem; margin-bottom: 1rem;
+      filter: drop-shadow(0 0 20px rgba(232,196,106,0.3));
+      transition: transform 0.3s, filter 0.3s;
+    }
+    .brand-card:hover .brand-emblem {
+      transform: scale(1.15) rotate(-5deg);
+      filter: drop-shadow(0 0 30px rgba(232,196,106,0.6));
+    }
+
+    .brand-country {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.55rem; letter-spacing: 0.4em;
+      text-transform: uppercase; color: var(--caramel);
+      margin-bottom: 0.5rem;
+    }
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; font-weight: 900;
+      color: var(--cream); line-height: 1;
+      margin-bottom: 0.8rem;
+    }
+    .brand-year {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.6rem; color: var(--gold);
+      letter-spacing: 0.2em;
+    }
+    .brand-desc {
+      font-size: 0.95rem; line-height: 1.6;
+      color: rgba(253,246,227,0.6);
+      margin: 1rem 0;
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.5s ease, opacity 0.4s;
+      opacity: 0;
+    }
+    .brand-card:hover .brand-desc {
+      max-height: 150px; opacity: 1;
+    }
+
+    .brand-tags {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .brand-tag {
+      padding: 0.2rem 0.8rem;
+      border: 1px solid rgba(232,196,106,0.3);
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.55rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+    .brand-card:hover .brand-tag {
+      background: rgba(232,196,106,0.1);
+      border-color: rgba(232,196,106,0.6);
+    }
+
+    /* Overlay shimmer */
+    .brand-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(26,10,0,0.8) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* TYPES SECTION */
+    .types-section {
+      background: var(--dark-choc);
+      position: relative; overflow: hidden;
+    }
+    .types-section::before {
+      content: 'CHOCOLATE';
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(8rem, 20vw, 18rem);
+      font-weight: 900;
+      color: rgba(200,134,10,0.04);
+      pointer-events: none; white-space: nowrap;
+    }
+
+    .types-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; max-width: 1200px; margin: 0 auto;
+    }
+    .type-card {
+      padding: 3rem 2rem; text-align: center;
+      border: 1px solid rgba(200,134,10,0.15);
+      position: relative; overflow: hidden;
+      transition: border-color 0.4s, transform 0.4s;
+    }
+    .type-card:hover {
+      border-color: rgba(200,134,10,0.5);
+      transform: translateY(-6px);
+    }
+    .type-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 100%, rgba(200,134,10,0.08) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .type-card:hover::before { opacity: 1; }
+
+    .type-icon { font-size: 3rem; margin-bottom: 1.5rem; display: block; }
+    .type-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; color: var(--gold);
+      margin-bottom: 0.8rem;
+    }
+    .type-desc {
+      font-size: 0.95rem; line-height: 1.7;
+      color: rgba(253,246,227,0.6);
+    }
+    .type-cocoa {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.6rem; letter-spacing: 0.3em;
+      color: var(--caramel); margin-top: 1rem;
+      display: block;
+    }
+
+    /* FEATURED */
+    .featured-section {
+      background: linear-gradient(to bottom, var(--dark-choc), var(--bitter));
+    }
+    .featured-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; max-width: 1200px; margin: 0 auto;
+      align-items: center;
+    }
+    .featured-text h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      color: var(--cream); margin-bottom: 1rem;
+    }
+    .featured-text h3 span { color: var(--gold); }
+    .featured-text p {
+      font-size: 1.05rem; line-height: 1.8;
+      color: rgba(253,246,227,0.65);
+      margin-bottom: 1.5rem;
+    }
+    .stat-row {
+      display: flex; gap: 2rem; margin: 2rem 0;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem; color: var(--gold);
+      display: block;
+    }
+    .stat-label {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.55rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--caramel);
+    }
+    .featured-visual {
+      position: relative;
+    }
+    .choc-stack {
+      display: flex; flex-direction: column; gap: 1px;
+    }
+    .choc-bar {
+      height: 70px;
+      border-radius: 4px;
+      display: flex; align-items: center; padding: 0 1.5rem;
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem; letter-spacing: 0.3em;
+      text-transform: uppercase;
+      position: relative; overflow: hidden;
+      cursor: none; transition: all 0.3s;
+    }
+    .choc-bar:hover { transform: translateX(10px); }
+    .choc-bar::after {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0;
+      width: 4px;
+    }
+    .bar-dark { background: linear-gradient(to right, #2d1206, #1a0a00); color: var(--caramel); }
+    .bar-dark::after { background: var(--caramel); }
+    .bar-milk { background: linear-gradient(to right, #5c3000, #3d1a00); color: var(--white-choc); }
+    .bar-milk::after { background: var(--white-choc); }
+    .bar-white { background: linear-gradient(to right, #3d2d00, #2d1f00); color: var(--gold); }
+    .bar-white::after { background: var(--gold); }
+    .bar-ruby { background: linear-gradient(to right, #3d0020, #1a000e); color: #ffb3cc; }
+    .bar-ruby::after { background: #ff6699; }
+    .bar-gold { background: linear-gradient(to right, #3d2800, #1a1000); color: var(--gold); }
+    .bar-gold::after { background: var(--gold); }
+
+    .bar-pct {
+      margin-left: auto;
+      font-size: 1.2rem; font-weight: 300;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* NEWSLETTER */
+    .newsletter-section {
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 50%, #3d1a08 0%, #1a0a00 70%);
+      padding: 8rem 4rem;
+    }
+    .newsletter-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--cream); margin-bottom: 1rem;
+    }
+    .newsletter-section h2 em { color: var(--gold); font-style: italic; }
+    .newsletter-section p {
+      color: rgba(253,246,227,0.6); font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+    }
+    .newsletter-form {
+      display: flex; gap: 0; max-width: 500px; margin: 0 auto;
+      border: 1px solid var(--caramel);
+    }
+    .newsletter-form input {
+      flex: 1; padding: 1rem 1.5rem;
+      background: transparent; border: none; outline: none;
+      color: var(--cream); font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.75rem; letter-spacing: 0.1em;
+    }
+    .newsletter-form input::placeholder { color: rgba(253,246,227,0.35); }
+    .newsletter-form button {
+      padding: 1rem 2rem;
+      background: var(--caramel); border: none;
+      color: var(--cocoa);
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem; letter-spacing: 0.3em;
+      text-transform: uppercase; cursor: none;
+      transition: background 0.3s;
+    }
+    .newsletter-form button:hover { background: var(--gold); }
+
+    /* FOOTER */
+    footer {
+      background: #0d0500;
+      padding: 3rem 4rem 2rem;
+      border-top: 1px solid rgba(200,134,10,0.1);
+    }
+    .footer-inner {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1400px; margin: 0 auto;
+      flex-wrap: wrap; gap: 1.5rem;
+    }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 900; color: var(--gold);
+    }
+    .footer-copy {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      color: rgba(253,246,227,0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 2rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.5rem; }
+      .types-grid { grid-template-columns: 1fr; }
+      .featured-grid { grid-template-columns: 1fr; }
+      .brands-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .brands-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Choco<span>latier</span></div>
+    <ul class="nav-links">
+      <li><a href="#brands">Brands</a></li>
+      <li><a href="#types">Varieties</a></li>
+      <li><a href="#featured">Collection</a></li>
+      <li><a href="#newsletter">Newsletter</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-circles"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">A Connoisseur's Guide to the World's Finest</p>
+      <h1 class="hero-title">
+        The Art of
+        <em>Chocolate</em>
+      </h1>
+      <p class="hero-sub">From the ancient cacao forests to the master artisans of Europe — explore the heritage, craft, and pure indulgence of the world's most beloved brands.</p>
+      <a href="#brands" class="hero-cta">Explore Brands</a>
+    </div>
+    <div class="scroll-hint"><span></span></div>
+  </section>
+
+  <div class="divider">Est. since antiquity</div>
+
+  <!-- BRANDS -->
+  <section class="brands-section" id="brands">
+    <div class="section-header">
+      <span class="section-tag">World Renowned</span>
+      <h2 class="section-title">Iconic <em>Chocolate Brands</em></h2>
+    </div>
+
+    <div class="brands-grid">
+
+      <!-- Lindt -->
+      <div class="brand-card brand-lindt">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">🍫</div>
+          <div class="brand-country">🇨🇭 Switzerland</div>
+          <div class="brand-name">Lindt</div>
+          <div class="brand-year">Founded 1845</div>
+          <p class="brand-desc">Masters of the conching process, Lindt crafts some of the world's smoothest milk and dark chocolates. Their iconic LINDOR truffles melt into a silky liquid centre.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Truffles</span>
+            <span class="brand-tag">Excellence</span>
+            <span class="brand-tag">Luxury</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ferrero -->
+      <div class="brand-card brand-ferrero">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">✨</div>
+          <div class="brand-country">🇮🇹 Italy</div>
+          <div class="brand-name">Ferrero Rocher</div>
+          <div class="brand-year">Founded 1946</div>
+          <p class="brand-desc">The golden ambassador of Italian confectionery — a whole hazelnut encased in creamy filling, crisp wafer shell, and fine milk chocolate dusted with hazelnut pieces.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Hazelnut</span>
+            <span class="brand-tag">Gifting</span>
+            <span class="brand-tag">Premium</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Godiva -->
+      <div class="brand-card brand-godiva">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">👑</div>
+          <div class="brand-country">🇧🇪 Belgium</div>
+          <div class="brand-name">Godiva</div>
+          <div class="brand-year">Founded 1926</div>
+          <p class="brand-desc">Born in Brussels, Godiva has epitomised Belgian luxury chocolate for nearly a century. Renowned for their elaborate pralines, ganaches, and seasonal collections.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Pralines</span>
+            <span class="brand-tag">Belgian</span>
+            <span class="brand-tag">Artisan</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Valrhona -->
+      <div class="brand-card brand-valrhona">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">🌿</div>
+          <div class="brand-country">🇫🇷 France</div>
+          <div class="brand-name">Valrhona</div>
+          <div class="brand-year">Founded 1922</div>
+          <p class="brand-desc">The choice of three-Michelin-star pastry chefs worldwide. Valrhona sources rare single-origin cacao from Ecuador, Venezuela, and Madagascar for unmatched complexity.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Single-Origin</span>
+            <span class="brand-tag">Chef's Choice</span>
+            <span class="brand-tag">Dark</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toblerone -->
+      <div class="brand-card brand-toblerone">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">⛰️</div>
+          <div class="brand-country">🇨🇭 Switzerland</div>
+          <div class="brand-name">Toblerone</div>
+          <div class="brand-year">Founded 1908</div>
+          <p class="brand-desc">As iconic as the Matterhorn it mirrors, Toblerone blends Swiss milk chocolate with honey and almond nougat into its unmistakable triangular peaks.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Nougat</span>
+            <span class="brand-tag">Iconic Shape</span>
+            <span class="brand-tag">Travel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cadbury -->
+      <div class="brand-card brand-cadbury">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">💜</div>
+          <div class="brand-country">🇬🇧 United Kingdom</div>
+          <div class="brand-name">Cadbury</div>
+          <div class="brand-year">Founded 1824</div>
+          <p class="brand-desc">Beloved across generations, Cadbury Dairy Milk remains one of the world's best-selling chocolate bars. George Cadbury pioneered ethical cocoa sourcing in the 19th century.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Dairy Milk</span>
+            <span class="brand-tag">Heritage</span>
+            <span class="brand-tag">Classic</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kinder -->
+      <div class="brand-card brand-kinder">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">🥚</div>
+          <div class="brand-country">🇩🇪 Germany</div>
+          <div class="brand-name">Kinder</div>
+          <div class="brand-year">Founded 1968</div>
+          <p class="brand-desc">Ferrero's gift to childhood — Kinder Surprise has delighted children for over 50 years with its thin milk chocolate shell, white cream layer, and legendary surprise toys.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Surprise</span>
+            <span class="brand-tag">Milk</span>
+            <span class="brand-tag">Family</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ghirardelli -->
+      <div class="brand-card brand-ghirardelli">
+        <div class="brand-bg"></div>
+        <div class="brand-card-inner">
+          <div class="brand-emblem">🇺🇸</div>
+          <div class="brand-country">🇺🇸 United States</div>
+          <div class="brand-name">Ghirardelli</div>
+          <div class="brand-year">Founded 1852</div>
+          <p class="brand-desc">San Francisco's oldest chocolate company, Ghirardelli is celebrated for their premium baking chocolate, intense dark squares, and signature caramel-filled confections.</p>
+          <div class="brand-tags">
+            <span class="brand-tag">Baking</span>
+            <span class="brand-tag">Intense Dark</span>
+            <span class="brand-tag">San Francisco</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TYPES -->
+  <section class="types-section" id="types">
+    <div class="section-header">
+      <span class="section-tag">A World of Flavour</span>
+      <h2 class="section-title">Chocolate <em>Varieties</em></h2>
+    </div>
+    <div class="types-grid">
+      <div class="type-card">
+        <span class="type-icon">🍫</span>
+        <div class="type-name">Dark Chocolate</div>
+        <p class="type-desc">The purist's choice. Rich in flavonoids and complex tannins, dark chocolate offers deep, earthy notes of fruit, spice, and roasted cocoa with minimal sweetness.</p>
+        <span class="type-cocoa">50%–100% Cacao</span>
+      </div>
+      <div class="type-card">
+        <span class="type-icon">🥛</span>
+        <div class="type-name">Milk Chocolate</div>
+        <p class="type-desc">The world's most beloved variety. Milk solids temper the intensity of cocoa, creating a sweet, creamy, and mellow profile enjoyed by all ages.</p>
+        <span class="type-cocoa">25%–45% Cacao</span>
+      </div>
+      <div class="type-card">
+        <span class="type-icon">🤍</span>
+        <div class="type-name">White Chocolate</div>
+        <p class="type-desc">Crafted from cocoa butter, milk, and sugar — without cocoa solids. A delicate, buttery sweetness with notes of vanilla and caramel.</p>
+        <span class="type-cocoa">Cocoa Butter Only</span>
+      </div>
+      <div class="type-card">
+        <span class="type-icon">🌸</span>
+        <div class="type-name">Ruby Chocolate</div>
+        <p class="type-desc">The 21st century's new category, discovered by Barry Callebaut in 2017. Made from naturally pink ruby cacao beans, it has a fruity, berry-like tang.</p>
+        <span class="type-cocoa">Naturally Pink</span>
+      </div>
+      <div class="type-card">
+        <span class="type-icon">🍯</span>
+        <div class="type-name">Caramel Chocolate</div>
+        <p class="type-desc">Created by slow-heating white chocolate until it caramelises. Blonde and toasty with butterscotch depth — popularised by Valrhona's Dulcey range.</p>
+        <span class="type-cocoa">Blonde & Caramelised</span>
+      </div>
+      <div class="type-card">
+        <span class="type-icon">🌱</span>
+        <div class="type-name">Single-Origin</div>
+        <p class="type-desc">Chocolate made from cacao harvested from a single plantation or region. Like fine wine, it expresses the unique terroir of its birthplace — earthy, floral, or fruity.</p>
+        <span class="type-cocoa">Pure Provenance</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED -->
+  <section class="featured-section" id="featured">
+    <div class="section-header">
+      <span class="section-tag">The Spectrum</span>
+      <h2 class="section-title">Cacao <em>Intensity</em> Guide</h2>
+    </div>
+    <div class="featured-grid">
+      <div class="featured-text">
+        <h3>From Sweet to <span>Intensely Pure</span></h3>
+        <p>The percentage of cacao in a chocolate bar defines its character — from the silky sweetness of milk chocolate to the assertive bitterness of a 100% cacao bar. Understanding this spectrum transforms the way you taste.</p>
+        <p>Elite chocolatiers like Valrhona and Lindt label their bars by exact cacao percentage, allowing connoisseurs to trace the precise balance between sweetness and complexity.</p>
+        <div class="stat-row">
+          <div class="stat">
+            <span class="stat-num">600+</span>
+            <span class="stat-label">Flavour compounds</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">20</span>
+            <span class="stat-label">Cacao producing nations</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">4000</span>
+            <span class="stat-label">Years of history</span>
+          </div>
+        </div>
+      </div>
+      <div class="featured-visual">
+        <div class="choc-stack">
+          <div class="choc-bar bar-white">White Chocolate — Buttery <span class="bar-pct">0%</span></div>
+          <div class="choc-bar bar-milk">Milk Chocolate — Creamy <span class="bar-pct">30%</span></div>
+          <div class="choc-bar bar-gold">Semi-Dark — Balanced <span class="bar-pct">55%</span></div>
+          <div class="choc-bar bar-dark">Dark Chocolate — Bold <span class="bar-pct">72%</span></div>
+          <div class="choc-bar bar-dark" style="filter:brightness(0.7)">Bittersweet — Complex <span class="bar-pct">85%</span></div>
+          <div class="choc-bar bar-ruby">Ruby — Fruity <span class="bar-pct">47%</span></div>
+          <div class="choc-bar bar-dark" style="filter:brightness(0.5)">Ultra-Dark — Intense <span class="bar-pct">100%</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter-section" id="newsletter">
+    <span class="section-tag">Join the Collective</span>
+    <h2>Indulge Your <em>Inner Connoisseur</em></h2>
+    <p>Monthly tasting notes, brand launches, and artisan discoveries — delivered to your inbox.</p>
+    <div class="newsletter-form">
+      <input type="email" placeholder="your@email.com" />
+      <button>Subscribe</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Chocolatier</div>
+      <div class="footer-copy">© 2026 Chocolatier Guide — A celebration of the world's finest confections</div>
+    </div>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+    document.addEventListener('mousemove', e => {
+      mouseX = e.clientX; mouseY = e.clientY;
+      cursor.style.transform = `translate(${mouseX - 6}px, ${mouseY - 6}px)`;
+    });
+
+    function animateRing() {
+      ringX += (mouseX - ringX) * 0.12;
+      ringY += (mouseY - ringY) * 0.12;
+      ring.style.transform = `translate(${ringX - 18}px, ${ringY - 18}px)`;
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    // Hover cursor effect
+    document.querySelectorAll('a, button, .brand-card, .type-card, .choc-bar').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        ring.style.width = '60px'; ring.style.height = '60px';
+        ring.style.borderColor = 'rgba(232,196,106,0.8)';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width = '36px'; ring.style.height = '36px';
+        ring.style.borderColor = 'rgba(232,196,106,0.5)';
+      });
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.brand-card, .type-card, .featured-text, .featured-visual').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(40px)';
+      el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
